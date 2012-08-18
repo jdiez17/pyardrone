@@ -54,8 +54,8 @@ class PyARDrone(object):
 
     @speed.setter
     def speed(self, val):
-#        if val not in map(lambda x: x/100.0, range(0, 100)):
-#            raise ValueError("Speed must be in the 0..1 range")
+        if val < 0 or val > 1: 
+            raise ValueError("Speed must be in the 0..1 range")
         self._speed = val
          
     @send
