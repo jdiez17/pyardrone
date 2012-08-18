@@ -43,11 +43,21 @@ def send(fn):
 class PyARDrone(object):
     def __init__(self):
         self.seq = 1
-        self.speed = 0.2
+        self._speed = 0.2
 
         self.comwdg_timer = threading.Timer(COMWDG_INTERVAL, self.comwdg)
         self.comwdg()
 
+    @property
+    def speed(self):
+        return self._speed
+
+    @speed.setter
+    def speed(self, val):
+#        if val not in map(lambda x: x/100.0, range(0, 100)):
+#            raise ValueError("Speed must be in the 0..1 range")
+        self._speed = val
+         
     @send
     def comwdg(self):
         return ComWdgCommand() 
@@ -58,7 +68,7 @@ class PyARDrone(object):
 
     @send
     def reset(self):
-        return [RefCommand(False, True), RefCommand(False, False)]
+        return [RefCommand(False, False), RefCommand(False, True)]
 
     @send
     def land(self):
@@ -68,10 +78,34 @@ class PyARDrone(object):
     def hover(self):
         return HoverCommand()
 
-if __name__ == '__main__':
-    drone = PyARDrone()
-    drone.reset()
-    drone.takeoff()
-    drone.hover()
-    time.sleep(5)
-    drone.land()
+    @send
+    def move_left(self):
+        return ProgressCommand(True, -self.speed, 0, 0, 0)
+
+    @send
+    def move_right(self):
+        return ProgressCommand(True, self.speed, 0, 0, 0)
+
+    @send
+    def move_up(self):
+        return ProgressCommand(True, 0, 0, self.speed, 0)
+
+    @send
+    def move_down(self):
+        return ProgressCommand(True, 0, 0, -self.speed, 0)
+
+    @send
+    def move_forward(self):
+        return ProgressCommand(True, 0, -self.speed, 0, 0)
+
+    @send
+    def move_backward(self):
+        return ProgressCommand(True, 0, self.speed, 0, 0)
+
+    @send
+    def turn_left(self):
+        return ProgressCommand(True, 0, 0, 0, -self.speed)
+
+    @send 
+    def turn_right(self):
+        return ProgressCommand(True, 0, 0, 0, self.speed)
